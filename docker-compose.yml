@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: ms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms_gameuser
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456"
+    ports:
+      - "9433:5432"   # 跟 MP 的 9432 错开，方便本机同时跑两套 compose
+    volumes:
+      - ms_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  userservice:
+    build:
+      context: .
+      dockerfile: src/MS.UserService/Dockerfile
+    container_name: ms-userservice
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=ms_gameuser;Username=postgres;Password=123456;Include Error Detail=true"
+      # Jwt 必须跟 MP.UserService 的 appsettings.json 完全一致，才能认出 MP 发的 token
+      Jwt__Issuer: "mp-midplatform"
+      Jwt__Audience: "game-clients"
+      Jwt__SecretKey: "SuperSecretKeyForDevelopmentChangeInProduction_AtLeast32Chars123456"
+    ports:
+      - "6001:8080"
+
+  game:
+    build:
+      context: .
+      dockerfile: src/MS.Game/Dockerfile
+    container_name: ms-game
+    restart: unless-stopped
+    ports:
+      - "6002:8080"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: src/MS.Gateway/Dockerfile
+    container_name: ms-gateway
+    restart: unless-stopped
+    depends_on:
+      - userservice
+      - game
+    environment:
+      Jwt__Issuer: "mp-midplatform"
+      Jwt__Audience: "game-clients"
+      Jwt__SecretKey: "SuperSecretKeyForDevelopmentChangeInProduction_AtLeast32Chars123456"
+      Services__UserService: "http://userservice:8080"
+      Services__Game: "http://game:8080"
+    ports:
+      - "6000:8080"
+
+volumes:
+  ms_postgres_data:

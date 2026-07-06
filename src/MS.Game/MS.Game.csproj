@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+  </PropertyGroup>
+
+  <!--
+    v0.0.1：只留一个空壳 + 健康检查，跑通"网关能转发到我"这条链路。
+    后续接入 LiteNetLib + MemoryPack 时，在这里加：
+      <PackageReference Include="LiteNetLib" Version="x.x.x" />
+      <PackageReference Include="MemoryPack" Version="x.x.x" />
+    并把 UDP 监听逻辑放进一个 BackgroundService，在 Program.cs 里 AddHostedService。
+  -->
+
+</Project>

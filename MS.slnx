@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MS.Gateway/MS.Gateway.csproj" />
+    <Project Path="src/MS.Shared/MS.Shared.csproj" />
+    <Project Path="src/MS.UserService/MS.UserService.csproj" />
+    <Project Path="src/MS.Game/MS.Game.csproj" />
+  </Folder>
+</Solution>
